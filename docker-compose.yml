@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000" # Adjust based on your backend's port
+    environment:
+      - NODE_ENV=production # Or any environment variables you need
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80" # Adjust based on the port your frontend is served on
+    depends_on:
+      - backend
