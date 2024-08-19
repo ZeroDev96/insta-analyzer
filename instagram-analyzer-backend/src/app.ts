@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -8,30 +8,29 @@ import rateLimit from 'express-rate-limit';
 import photoRoutes from './routes/photoRoutes';
 import authRoutes from './routes/authRoutes';
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 
 // Security Middleware
-app.use(helmet()); // Adds various HTTP headers for security
+app.use(helmet());
 
-// Allow requests from your frontend (adjust origin as needed)
+// CORS Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3001',
 }));
 
 // Logging Middleware
-app.use(morgan('combined')); // Logs HTTP requests and errors
+app.use(morgan('combined'));
 
-// Rate Limiting Middleware to protect against brute-force attacks
+// Rate Limiting Middleware
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  max: 100, // limit each IP to 100 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
 app.use(limiter);
 
-// Body Parsing Middleware for JSON and URL-encoded data
+// Body Parsing Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,16 +38,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
-app.use('/api/v1/photos', photoRoutes);  // Ensure this matches your export
-app.use('/api/v1/auth', authRoutes);      // Ensure this matches your export
+app.use('/api/v1/photos', photoRoutes);  // Using the photo routes
+app.use('/api/v1/auth', authRoutes);      // Using the auth routes
 
 // Handle 404 for unknown routes
-app.use((_req: Request, res: Response) => {
+app.use((_req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
 // Global Error Handling Middleware
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err, _req, res, _next) => {
   console.error('Internal Server Error:', err);
   res.status(500).json({ error: 'An internal server error occurred.' });
 });

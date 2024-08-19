@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { analyzePhotosWithGPT } from '../services/analysisService';
+import { analyzePhotoWithGPT } from '../services/analysisService'; // Adjust the path if necessary
 import fs from 'fs/promises';
 
 const feedbackFile = './feedback.json';
@@ -17,31 +17,20 @@ const saveFeedback = async (feedback: { rating: number, comments: string }) => {
 };
 
 // Controller to handle photo uploads and analysis
-export const uploadPhotos = async (req: Request, res: Response) => {
-    const { prompt, description, rating, comments } = req.body;
-
+export const uploadPhoto = async (req: Request, res: Response) => {
     try {
-        const files = req.files as Express.Multer.File[];
-        if (files && files.length > 0) {
-            const filePaths = files.map(file => file.path);
-
-            // Analyze the set of photos
-            const analysisResult = await analyzePhotosWithGPT(filePaths, prompt, description);
-
-            // Save feedback if provided
-            if (rating && comments) {
-                await saveFeedback({ rating, comments });
-            }
-
-            return res.status(200).json({
-                analysis: analysisResult,
-                filePaths: filePaths.map(filePath => `/uploads/${filePath.split('/').pop()}`)
-            });
-        } else {
-            return res.status(400).json({ error: 'No files uploaded.' });
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded.' });
         }
+
+        const analysisResult = await analyzePhotoWithGPT(req.file.path, req.body.prompt);
+        
+        res.status(200).json({
+            analysis: analysisResult,
+            filePath: `/uploads/${req.file.filename}`
+        });
     } catch (error) {
-        console.error('Error in uploadPhotos:', error);
-        return res.status(500).json({ error: 'Photo analysis failed.' });
+        console.error('Error in uploadPhoto:', error);
+        res.status(500).json({ error: 'Photo analysis failed.' });
     }
 };
