@@ -4,12 +4,17 @@ FROM node:14 AS build
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy package.json and package-lock.json
 COPY package.json ./
+COPY package-lock.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code and build the production files
+# Copy the rest of the application code
 COPY . .
+
+# Build the application
 RUN npm run build
 
 # Use a lightweight web server to serve the files
