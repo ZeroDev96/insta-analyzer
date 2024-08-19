@@ -2,14 +2,14 @@ version: '3.8'  # Update this to the latest version
 
 services:
   backend:
-    build: ./backend
+    build: ./instagram-analyzer-backend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
 
   frontend:
-    build: ./frontend
+    build: ./instagram-analyzer-frontend
     ports:
       - "8080:80"
     depends_on:
